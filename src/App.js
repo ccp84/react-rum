@@ -37,6 +37,41 @@ try {
   // Ignore errors thrown during CloudWatch RUM web client initialization
 }
 
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error) {
+    // Update state so the next render will show the fallback UI.
+    return { hasError: true };
+  }
+  componentDidCatch(error, errorInfo) {
+    console.log("recordingError: " + error);
+    // Log error out to AWS RUM
+    awsRum.recordError("Error level goes here", error);
+  }
+  render() {
+    if (this.state.hasError) {
+      // You can render any custom fallback UI
+      return (
+        <div>
+          <h1>Something went wrong.</h1>
+          <button
+            onClick={() => {
+              window.location.href = "/";
+            }}
+          >
+            Clear Error
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 export default function App() {
   return (
     <Router>
@@ -53,13 +88,15 @@ export default function App() {
         <p>
           <Link to="/welcome">Welcome</Link>
         </p>
-        <Routes>
-          <Route path="/about" element={<About />} />
-          <Route path="/users" element={<Users />} />
-          <Route path="/user/*" element={<User />} />
-          <Route path="/welcome" element={<Welcome />} />
-          <Route exact path="/" element={<Home />} />
-        </Routes>
+        <ErrorBoundary>
+          <Routes>
+            <Route path="/about" element={<About />} />
+            <Route path="/users" element={<Users />} />
+            <Route path="/user/*" element={<User />} />
+            <Route path="/welcome" element={<Welcome />} />
+            <Route exact path="/" element={<Home />} />
+          </Routes>
+        </ErrorBoundary>
       </div>
     </Router>
   );
