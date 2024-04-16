@@ -50,7 +50,7 @@ class ErrorBoundary extends React.Component {
   componentDidCatch(error, errorInfo) {
     console.log("recordingError: " + error);
     // Log error out to AWS RUM
-    awsRum.recordError("Error level goes here", error);
+    awsRum.recordError("Error level goes here" + error);
   }
   render() {
     if (this.state.hasError) {
